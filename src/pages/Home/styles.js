@@ -41,4 +41,21 @@ export default StyleSheet.create({
     backgroundColor: 'rgba(246, 246, 246, .69)',
     color: '#B2B2B2',
   },
+  containerPokemon:{
+    borderRadius: 20,
+    flexDirection: "row",
+    marginTop: 20,
+    // marginBottom: 20
+  },
+  titlePokemon: {
+    fontFamily: 'Roboto_700Bold',
+    color: '#FFFFFF',
+    fontSize: 32
+    // '&::first-letter': {
+    //   'textTransform': 'uppercase'
+    // }
+  },
+  numberPokedex: {
+    opacity: .4
+  }
 })
