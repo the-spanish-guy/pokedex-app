@@ -45,14 +45,15 @@ const getPokemon = async() => {
   results.map(async (pokemon) => {
     let poke = {}
     
-    const { id, name } = await getSpecificPokemon(pokemon.name)
+    const { id, name, types } = await getSpecificPokemon(pokemon.name)
     const img = await getImagePokemon(name)
-    const type = await getColorByType(name)
+    const type = await getColor(types[0].type.name)
 
     poke.id = id
     poke.name = name
     poke.url = img
     poke.color = type
+    poke.types = types
 
     await Promise.all(res.push(poke))
   })

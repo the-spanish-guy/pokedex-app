@@ -47,6 +47,9 @@ export default StyleSheet.create({
     marginTop: 20,
     // marginBottom: 20
   },
+  containTextPokemon:{
+    flex: 1
+  },
   titlePokemon: {
     fontFamily: 'Roboto_700Bold',
     color: '#FFFFFF',
@@ -56,6 +59,22 @@ export default StyleSheet.create({
     // }
   },
   numberPokedex: {
+    position: "absolute",
+    fontSize: 50,
+    bottom: -10,
+    right: 4,
     opacity: .4
+  },
+  iconContainer: {
+    flexDirection: "row",
+    // borderWidth: 1
+  },
+  iconContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 6,
+    width: 26,
+    height: 26,
+    borderRadius: 50
   }
 })

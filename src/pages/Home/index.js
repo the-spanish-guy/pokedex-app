@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import { Text, View, TextInput, FlatList, Image } from 'react-native'
-import { Ionicons } from "@expo/vector-icons";
-import { useFonts,  Roboto_700Bold, Roboto_400Regular } from "@expo-google-fonts/roboto";
 import { AppLoading } from 'expo';
+import SvgUri from 'react-native-svg-uri';
+import { Ionicons } from "@expo/vector-icons";
+import { Text, View, TextInput, FlatList, Image } from 'react-native'
+import { useFonts,  Roboto_700Bold, Roboto_400Regular } from "@expo-google-fonts/roboto";
 
+
+import { formatNumber, getTypeIconColor, getIconByType } from '../../utils/utils'
+import { getPokemon } from '../../service/api'
 import styles from './styles'
-import { formatNumber } from '../../utils/utils'
 
-import { getAllPokemon, getImagePokemon, getColorByType, getPokemon } from '../../service/api'
 
 export default function Home() {
   let [fontLoaded] = useFonts({Roboto_400Regular, Roboto_700Bold})
@@ -20,25 +22,13 @@ export default function Home() {
     setPokemon(response)
   }
 
-  async function getImg (item) {
-    // console.log(item)
-    const { name } = item
-    let datas = { name: { url: '' } }
-    const result = await getImagePokemon(name)
-      .then((res) => { return datas.name.url = res })
-      .catch((e) => console.log('error: ', e));
-
-    return result
-  }
-
-  function Capitalize(str){
+  function capitalize(str){
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   useEffect(() => {
     getPokemons()
   }, [])
-
 
   if (!fontLoaded) {
     return <AppLoading />;
@@ -59,20 +49,32 @@ export default function Home() {
         </View>
         <Ionicons style={styles.searchIcon} name="ios-options" size={20} color="#000"/>
       </View>
+
       <Text>The Pokédex contains detailed stats for every creature from the Pokémon games.</Text>
 
       <FlatList
         style={{width: "90%", height: 'auto'}}
         data={pokemon}
-        keyExtractor={ ({item}) => item}
+        keyExtractor={ ({ id }) => id}
         horizontal={false}
-        showsHorizontalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         renderItem={ ({ item }) => (
           <View style={[styles.containerPokemon, { backgroundColor: item.color }]}>
             <Image source={{ uri: item.url }} style={{width: 100, height: 100}}/>
-            <View>
-              <Text style={styles.titlePokemon}>{Capitalize(item.name)}</Text>
-              <Text style={[styles.titlePokemon, styles.numberPokedex]}>#{formatNumber(item.id)}</Text>
+            <View style={styles.containTextPokemon}>
+              <View style={{marginTop: 8, marginLeft: 8}}>
+                <Text style={styles.titlePokemon}>{capitalize(item.name)}</Text>
+                <View style={styles.iconContainer}>
+                  {
+                    item.types.map((type) => (
+                      <View style={[styles.iconContent, { backgroundColor: getTypeIconColor(type.type.name)}]}>
+                        <SvgUri width="18" height="18" source={getIconByType(type.type.name)} />
+                      </View>
+                    ))
+                  }
+                </View>
+              </View>
+              <Text style={[styles.titlePokemon, styles.numberPokedex]}>{formatNumber(item.id)}</Text>
             </View>
           </View>
         )}
