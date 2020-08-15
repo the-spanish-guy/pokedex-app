@@ -17,8 +17,7 @@ export default function Home() {
   const [pokemon, setPokemon] = useState([])
 
   async function getPokemons () {
-    const response = await getPokemon()    
-    console.log('aquiaqui: ', response)
+    const response = await getPokemon()
     setPokemon(response)
   }
 

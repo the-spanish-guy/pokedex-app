@@ -38,29 +38,39 @@ const getColorByType = async (name) => {
 }
 
 const getPokemon = async() => {
+  const { results } = await getAllPokemon();
+  // results.sort((a,b) => a.url > b.url ? 1 : -1)
+  let pokemons = results
   const res = []
 
-  const { results } = await getAllPokemon();
+  // pokemons.sort((a, b) => {
+  //   if (a-b) {
+      
+  //   }
+  //   console.log('aa:',a)
+  //   console.log('bb:',b)
+  // })
+  pokemons.sort((a,b) => a.url - b.url)
+    .map(async (pokemon) => {
+      let poke = {}
+      
+      const { id, name, types } = await getSpecificPokemon(pokemon.name)
+      const img = await getImagePokemon(name)
+      const type = getColor(types[0].type.name)
 
-  results.map(async (pokemon) => {
-    let poke = {}
-    
-    const { id, name, types } = await getSpecificPokemon(pokemon.name)
-    const img = await getImagePokemon(name)
-    const type = await getColor(types[0].type.name)
+      poke.id = id
+      poke.name = name
+      poke.url = img
+      poke.url2 = pokemon.url
+      poke.color = type
+      poke.types = types
 
-    poke.id = id
-    poke.name = name
-    poke.url = img
-    poke.color = type
-    poke.types = types
-
-    await Promise.all(res.push(poke))
-  })
-  // res.map((a) => console.log('teste: ', a))
-  return res.sort((a, b) => a - b)
+      await Promise.all(
+        res.push(poke),
+        res.sort((a,b) => a.id - b.id)
+        )
+    })
+  return res
 }
 
-
-// console.log(getPokemon())
 export { getAllPokemon, getSpecificPokemon, getImagePokemon, getColorByType, getPokemon }
