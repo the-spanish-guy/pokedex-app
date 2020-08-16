@@ -250,6 +250,11 @@ const getIconByType = (type) => {
     case 'water':
       return require('../assets/water.svg')
       break;
+
+    case 'pokeball':
+      console.log(type)
+      return require('../assets/pokebola.svg')
+      break;
     
     default:
     return '#FF0000'
@@ -274,4 +279,8 @@ const formatNumber = (number) => {
   }
 }
 
-export { getColor, formatNumber, getTypeIconColor, getIconByType }
+function capitalize(str){
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export { getColor, formatNumber, getTypeIconColor, getIconByType, capitalize }

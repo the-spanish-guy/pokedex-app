@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { AppLoading } from 'expo';
 import SvgUri from 'react-native-svg-uri';
 import { Ionicons } from "@expo/vector-icons";
-import { Text, View, TextInput, FlatList, Image } from 'react-native'
+import { Text, View, TextInput, FlatList, Image, TouchableOpacity } from 'react-native'
 import { useFonts,  Roboto_700Bold, Roboto_400Regular } from "@expo-google-fonts/roboto";
+import { useNavigation } from "@react-navigation/native";
 
-
-import { formatNumber, getTypeIconColor, getIconByType } from '../../utils/utils'
+import { formatNumber, getTypeIconColor, getIconByType, capitalize } from '../../utils/utils'
 import { getPokemon } from '../../service/api'
 import styles from './styles'
 
@@ -15,14 +15,27 @@ export default function Home() {
   let [fontLoaded] = useFonts({Roboto_400Regular, Roboto_700Bold})
   const [searchPokemon, setSearchPokemon] = useState('')
   const [pokemon, setPokemon] = useState([])
+  const [page, setPage] = useState('')
+
+  const navigation = useNavigation()
 
   async function getPokemons () {
-    const response = await getPokemon()
-    setPokemon(response)
+    setPage('')
+    const response = await getPokemon(page)
+    console.log('aquiaqui: ', response)
+    setPokemon(response[0])
+    setPage(response[1])
   }
 
-  function capitalize(str){
-    return str.charAt(0).toUpperCase() + str.slice(1);
+  // async function nextPage() {
+  //   console.log(page)
+  //   const response = await getPokemon(page)
+  //   setPokemon([...response[0], ...pokemon])
+  //   setPage(response[1])
+  // }
+
+  function changePage(pokemon, uri) {
+    navigation.push('Pokemon', { pokemon, uri })
   }
 
   useEffect(() => {
@@ -52,13 +65,18 @@ export default function Home() {
       <Text>The Pokédex contains detailed stats for every creature from the Pokémon games.</Text>
 
       <FlatList
-        style={{width: "90%", height: 'auto'}}
+        style={{flex:1}}
         data={pokemon}
-        keyExtractor={ ({ id }) => id}
+        keyExtractor={ ({ id }) => String(id)}
         horizontal={false}
         showsVerticalScrollIndicator={false}
+        onEndReached={getPokemons}
+        onEndReachedThreshold={0.5}
         renderItem={ ({ item }) => (
-          <View style={[styles.containerPokemon, { backgroundColor: item.color }]}>
+          <TouchableOpacity
+            style={[styles.containerPokemon, { backgroundColor: item.color }]}
+            onPress={() => changePage(item.all, item.url)}
+          >
             <Image source={{ uri: item.url }} style={{width: 100, height: 100}}/>
             <View style={styles.containTextPokemon}>
               <View style={{marginTop: 8, marginLeft: 8}}>
@@ -75,7 +93,7 @@ export default function Home() {
               </View>
               <Text style={[styles.titlePokemon, styles.numberPokedex]}>{formatNumber(item.id)}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>

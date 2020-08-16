@@ -9,11 +9,14 @@ const getImage = axios.create({
   baseURL: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork'
 })
 
-const getAllPokemon = async () => {
-  const response = await pokeApi.get('/pokemon')
-
-  // console.log(response.data)
-  return response.data
+const getAllPokemon = async (page) => {
+  if(!page) {
+    console.log('aquixigs', page)
+    const { data } = await pokeApi.get('/pokemon')
+    return data
+  }
+  const { data } = await axios.get(page)
+  return data
 }
 
 const getSpecificPokemon = async (name) => {
@@ -21,56 +24,58 @@ const getSpecificPokemon = async (name) => {
   return response.data
 }
 
-const getImagePokemon = async (name) => {
-  const { id } = await getSpecificPokemon(name)
-  // const res = await getImage.get(`/${id}.png`)
-  // return id;
+const getInfo = async (nameorId) => {
+  const { data } = await pokeApi.get(`/pokemon-species/${nameorId}/`)
+  const { name, flavor_text_entries } = data
+  const description = flavor_text_entries
+  .filter((desc) => desc.language.name === 'en')
+  .sort((a,b) => a.version.url - b.version.url)
+  .slice(-1)
+  console.log('name', name)
+  console.log('aaaa', description)
+
+  return description[0].flavor_text
+}
+
+const getImagePokemon = async (id) => {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`
-  // return res
 }
 
 const getColorByType = async (name) => {
   const { types } = await getSpecificPokemon(name)
 
   const result = getColor(types[0].type.name)
-  // console.log(result)
   return result
 }
 
-const getPokemon = async() => {
-  const { results } = await getAllPokemon();
-  // results.sort((a,b) => a.url > b.url ? 1 : -1)
+const getPokemon = async(nextPage) => {
+  const { results, next } = await getAllPokemon(nextPage);
   let pokemons = results
   const res = []
 
-  // pokemons.sort((a, b) => {
-  //   if (a-b) {
-      
-  //   }
-  //   console.log('aa:',a)
-  //   console.log('bb:',b)
-  // })
   pokemons.sort((a,b) => a.url - b.url)
     .map(async (pokemon) => {
       let poke = {}
       
-      const { id, name, types } = await getSpecificPokemon(pokemon.name)
-      const img = await getImagePokemon(name)
-      const type = getColor(types[0].type.name)
+      const po = await getSpecificPokemon(pokemon.name)
+      const img = await getImagePokemon(po.id)
+      const type = getColor(po.types[0].type.name)
 
-      poke.id = id
-      poke.name = name
+      poke.id = po.id
+      poke.name = po.name
       poke.url = img
-      poke.url2 = pokemon.url
       poke.color = type
-      poke.types = types
+      poke.types = po.types
+      poke.all = po
 
       await Promise.all(
         res.push(poke),
         res.sort((a,b) => a.id - b.id)
         )
     })
-  return res
+  return [res, next]
 }
 
-export { getAllPokemon, getSpecificPokemon, getImagePokemon, getColorByType, getPokemon }
+// (getInfo(40))
+
+export { getAllPokemon, getSpecificPokemon, getImagePokemon, getColorByType, getPokemon, getInfo }
