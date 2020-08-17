@@ -3,7 +3,7 @@ import { AppLoading } from 'expo';
 import SvgUri from 'react-native-svg-uri';
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View, TextInput, FlatList, Image, TouchableOpacity } from 'react-native'
-import { useFonts,  Roboto_700Bold, Roboto_400Regular } from "@expo-google-fonts/roboto";
+import { useFonts,  Roboto_700Bold, Roboto_400Regular, Roboto_500Medium } from "@expo-google-fonts/roboto";
 import { useNavigation } from "@react-navigation/native";
 
 import { formatNumber, getTypeIconColor, getIconByType, capitalize } from '../../utils/utils'
@@ -12,7 +12,7 @@ import styles from './styles'
 
 
 export default function Home() {
-  let [fontLoaded] = useFonts({Roboto_400Regular, Roboto_700Bold})
+  let [fontLoaded] = useFonts({Roboto_400Regular, Roboto_700Bold, Roboto_500Medium})
   const [searchPokemon, setSearchPokemon] = useState('')
   const [pokemon, setPokemon] = useState([])
   const [page, setPage] = useState('')

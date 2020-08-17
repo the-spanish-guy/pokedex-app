@@ -47,6 +47,15 @@ export default StyleSheet.create({
     flexDirection: "row",
     marginTop: 20,
     // marginBottom: 20
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          
+          elevation: 5,
   },
   containTextPokemon:{
     flex: 1
@@ -76,6 +85,15 @@ export default StyleSheet.create({
     margin: 6,
     width: 26,
     height: 26,
-    borderRadius: 50
+    borderRadius: 50,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    
+    elevation: 5,
   }
 })
