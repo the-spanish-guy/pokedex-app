@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Image, StyleSheet, TouchableOpacity, ProgressBarAndroid } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { getImagePokemon, getInfo } from "../../service/api";
+import { getImagePokemon, getInfo, getCategory } from "../../service/api";
 import Constants from "expo-constants";
 import {
   getColor,
@@ -12,6 +12,8 @@ import {
 } from "../../utils/utils";
 import SvgUri from "react-native-svg-uri";
 import { TabView, SceneMap } from "react-native-tab-view";
+import female from "../../assets/female.svg";
+import { Ionicons } from "@expo/vector-icons";
 
 import Animated, { Easing } from "react-native-reanimated";
 
@@ -19,6 +21,7 @@ export default function pokemon() {
   const route = useRoute();
   const { pokemon, uri } = route.params;
   const [info, setInfo] = useState("");
+  const [category, setCategory] = useState("");
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: "about", title: "About" },
@@ -26,10 +29,19 @@ export default function pokemon() {
     { key: "evolution", title: "Evolution" },
   ]);
   const [cor, setCor] = useState("");
+  const [color2, setColor2] = useState("");
 
   async function getInfoPokemon() {
+    pokemon.stats.map((st) => {
+      console.log(st.base_stat);
+    });
     const res = await getInfo(pokemon.id);
     setInfo(res);
+  }
+
+  async function getCatgeoryPokemon() {
+    const res = await getCategory(pokemon.id);
+    setCategory(res);
   }
 
   function getColors() {
@@ -37,17 +49,23 @@ export default function pokemon() {
     console.log("CORES: ", a);
     setCor(a);
   }
+  async function getOtherColor() {
+    const color = getTypeIconColor(pokemon.types[0].type.name);
+    setColor2(color);
+  }
 
   useEffect(() => {
     getInfoPokemon();
     getColors();
+    getOtherColor();
+    getCatgeoryPokemon();
   }, []);
 
   function About() {
     return (
-      <View style={[styles.container]}>
+      <View style={[styles.container, { width: "90%", alignSelf: "center" }]}>
         <Text style={{ color: "#828282" }}>{info}</Text>
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", marginBottom: 12 }}>
           {pokemon.types.map((type) => (
             <View
               style={{
@@ -66,7 +84,7 @@ export default function pokemon() {
                 },
                 shadowOpacity: 0.25,
                 shadowRadius: 3.84,
-                
+
                 elevation: 5,
               }}
             >
@@ -90,45 +108,130 @@ export default function pokemon() {
           ))}
         </View>
 
-        <Text>Pokédex Data</Text>
-        <View style={{
-          alignSelf: "center",
-          width: '90%',
-          padding: 4,
-          height: 80,
-          borderRadius: 10,
-          backgroundColor: '#F6F6F6',
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-          
-          elevation: 5,
-        }}>
-          <View style={{flexDirection: "row", justifyContent: "space-around"}}>
-            <Text>Height</Text>
-            <Text>Weight</Text>
-            <Text>Gender</Text>
-            <Text>Category</Text>
-          </View>
+        <Text
+          style={{
+            color: color2,
+            fontFamily: "Roboto_700Bold",
+            fontSize: 22,
+            marginBottom: 18,
+          }}
+        >
+          Pokédex Data
+        </Text>
+        <View
+          style={{
+            alignSelf: "center",
+            width: "100%",
+            padding: 4,
+            // height: 80,
+            borderRadius: 10,
+            backgroundColor: "#FCFCFC",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
 
-          <Text>Abilities</Text>
-          {
-            pokemon.abilities.map(({ability, is_hidden}) => (
+            elevation: 5,
+          }}
+        >
+          <View>
+            {/* thead */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                marginBottom: 8,
+              }}
+            >
+              <Text>Height</Text>
+              <Text>Weight</Text>
+              <Text>Gender</Text>
+              <Text>Category</Text>
+            </View>
+
+            {/* tbody */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
+                {pokemon.height}
+              </Text>
+              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
+                {pokemon.weight}
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-around",
+                  width: 34,
+                }}
+              >
+                <Ionicons
+                  style={[styles.searchIcon, { color: color2 }]}
+                  name="md-female"
+                  size={18}
+                />
+                <Ionicons
+                  style={[styles.searchIcon, { color: color2 }]}
+                  name="md-male"
+                  size={18}
+                />
+              </View>
+              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
+                {category}
+              </Text>
+            </View>
+          </View>
+          <View style={{ justifyContent: "space-between", margin: 20 }}>
+            <Text
+              style={{
+                fontFamily: "Roboto_400Regular",
+                fontSize: 16,
+                marginBottom: 2,
+              }}
+            >
+              Abilities
+            </Text>
+            {pokemon.abilities.map((item, index) => (
               <>
-                <Text>{`${ability.name} ${is_hidden ? '(hidden ability)' : ''} `}</Text>
+                <Text
+                  style={{
+                    color: color2,
+                    fontFamily: "Roboto_500Medium",
+                    marginTop: 6,
+                  }}
+                >{`${index + 1}.  ${item.ability.name} ${
+                  item.is_hidden ? "(hidden ability)" : ""
+                } `}</Text>
               </>
-            ))
-          }
+            ))}
+          </View>
         </View>
       </View>
     );
   }
   function Status() {
-    return <View style={[styles.container]} />;
+    return (
+      <View style={[styles.container]}>
+        <Text>Base Stats</Text>
+        {pokemon.stats.map((st) => (
+          <View>
+            <View style={{flexDirection: "row"}}>
+              <Text style={{ color: "black" }}>{st.stat.name}</Text>
+              <Text style={{ color: "black" }}>{st.base_stat}</Text>
+              <ProgressBarAndroid styleAttr="Horizontal" color={color2} indeterminate={false} progress={st.base_stat/100} />
+            </View>
+          </View>
+        ))}
+      </View>
+    );
   }
   function Evolution() {
     return <View style={[styles.container]} />;
@@ -295,7 +398,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    
+
     elevation: 5,
   },
   tabBar: {
