@@ -7,7 +7,7 @@ import { useFonts,  Roboto_700Bold, Roboto_400Regular, Roboto_500Medium } from "
 import { useNavigation } from "@react-navigation/native";
 
 import { formatNumber, getTypeIconColor, getIconByType, capitalize } from '../../utils/utils'
-import { getPokemon } from '../../service/api'
+import { getPokemons, getSpecificPokemon, getSinglePokemon } from '../../service/api'
 import styles from './styles'
 
 
@@ -15,16 +15,15 @@ export default function Home() {
   let [fontLoaded] = useFonts({Roboto_400Regular, Roboto_700Bold, Roboto_500Medium})
   const [searchPokemon, setSearchPokemon] = useState('')
   const [pokemon, setPokemon] = useState([])
+  const [hasRefresh, setHasRefresh] = useState(true);
   const [page, setPage] = useState('')
 
   const navigation = useNavigation()
 
-  async function getPokemons () {
-    setPage('')
-    const response = await getPokemon(page)
-    console.log('aquiaqui: ', response)
-    setPokemon(response[0])
-    setPage(response[1])
+  async function loadPokemon() {
+    const data = await getPokemons();
+    setHasRefresh(false)
+    setPokemon(data)
   }
 
   // async function nextPage() {
@@ -34,12 +33,29 @@ export default function Home() {
   //   setPage(response[1])
   // }
 
-  function changePage(pokemon, uri) {
-    navigation.push('Pokemon', { pokemon, uri })
+  async function changePage(pokemon) {
+    const data = await getSpecificPokemon(pokemon.id);
+    console.log(data)
+    const obj = {
+      pokemon,
+      dataPokemon: [data]
+    }
+    navigation.push('Pokemon', obj)
+  }
+  async function seachPokemon(name) {
+    console.log(searchPokemon)
+    const data = await getSinglePokemon(name);
+    setHasRefresh(false)
+    setPokemon(data)
   }
 
   useEffect(() => {
-    getPokemons()
+    // getPokemons();
+    if(hasRefresh !== false) {
+      console.log(hasRefresh)
+      loadPokemon();
+      return
+    }
   }, [])
 
   if (!fontLoaded) {
@@ -57,6 +73,7 @@ export default function Home() {
             value={searchPokemon}
             onChangeText={(e) => setSearchPokemon(e)}
             underlineColorAndroid="transparent"
+            onEndEditing={() => seachPokemon(searchPokemon)}
           />
         </View>
         <Ionicons style={styles.searchIcon} name="ios-options" size={20} color="#000"/>
@@ -70,12 +87,12 @@ export default function Home() {
         keyExtractor={ ({ id }) => String(id)}
         horizontal={false}
         showsVerticalScrollIndicator={false}
-        onEndReached={getPokemons}
+        onEndReached={loadPokemon}
         onEndReachedThreshold={0.5}
         renderItem={ ({ item }) => (
           <TouchableOpacity
             style={[styles.containerPokemon, { backgroundColor: item.color }]}
-            onPress={() => changePage(item.all, item.url)}
+            onPress={() => changePage(item)}
           >
             <Image source={{ uri: item.url }} style={{width: 100, height: 100}}/>
             <View style={styles.containTextPokemon}>

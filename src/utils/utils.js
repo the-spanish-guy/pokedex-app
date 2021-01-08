@@ -283,4 +283,126 @@ function capitalize(str){
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export { getColor, formatNumber, getTypeIconColor, getIconByType, capitalize }
+const getEffectiveByType = (type) => {
+  switch (type) {
+    case 'bug':
+      return {
+        vulnerability: ["flying", "rock", "fire"],
+        resistent: ["fighting", "ground", "grass"],
+      };
+    case 'dark':
+      return {
+        vulnerability: ["fighting", "bug", "fairy"],
+        resistent: ["ghost", "psychic", "dark"],
+      };
+    case 'dragon':
+      return {
+        vulnerability: ["ice", "dragon", "fairy"],
+        resistent: ["fire", "water", "grass", "electric"],
+      };
+    case 'electric':
+      return {
+        vulnerability: ["ground"],
+        resistent: ["flying", "steel", "electric"],
+      };
+    case 'fairy':
+      return {
+        vulnerability: ["poison", "steel"],
+        resistent: ["flying", "bug", "dragon", "dark"],
+      };
+    case 'fighting':
+      return {
+        vulnerability: ["flying", "psychic", "fairy"],
+        resistent: ["rock", "bug", "dark"],
+      };
+    case 'fire':
+      return {
+        vulnerability: ["ground", "rock", "water"],
+        resistent: ["bug", "steel", "fire", "grass", "ice"],
+      };
+    case 'flying':
+      return {
+        vulnerability: ["rock", "electric", "ice"],
+        resistent: ["fighting", "ground", "bug", "fairy"],
+      };
+    case 'ghost':
+      return {
+        vulnerability: ["ghost", "dark"],
+        resistent: ["normal", "fighting", "poison", "bug"],
+      };
+    case 'grass':
+      return {
+        vulnerability: ["flying", "poison", "bug", "fire", "ice"],
+        resistent: ["ground", "water", "grass", "electric"],
+      };
+    case 'ground':
+      return {
+        vulnerability: ["water", "grass", "ice"],
+        resistent: ["poison", "rock", "electric"],
+      };
+    case 'ice':
+      return {
+        vulnerability: ["fighting", "rock", "steel", "fire"],
+        resistent: ["ice"],
+      };
+    case 'normal':
+      return {
+        vulnerability: ["fighting"],
+        resistent: ["ghost"],
+      };
+    case 'poison':
+      return {
+        vulnerability: ["ground", "psychic"],
+        resistent: ["fighting", "poison", "grass", "fairy"],
+      };
+    case 'psychic':
+      return {
+        vulnerability: ["grass", "ghost", "dark"],
+        resistent: ["fighting", "psychic",],
+      };
+    case 'rock':
+      return {
+        vulnerability: ["fighting", "ground", "steel", "water", "grass"],
+        resistent: ["normal", "flying", "poison", "fire"],
+      };
+    case 'steel':
+      return {
+        vulnerability: ["fighting", "ground", "fire"],
+        resistent: ["normal", "flying", "poison", "rock", "bug", "steel", "grass", "psychic", "ice", "dragon", "fairy"],
+      };
+    case 'water':
+      return {
+        vulnerability: ["grass", "electric"],
+        resistent: ["steel", "fire", "water", "ice"],
+      };
+
+    default:
+      break;
+  }
+};
+
+const getVulnarability = (type) => {
+  let vulnerabilidade = [],
+    resistencia = [];
+    
+  type.map(({type: t}) => {
+    console.log(t)
+    const { vulnerability: v, resistent: r } = getEffectiveByType(t.name);
+    vulnerabilidade.push(...v);
+    resistencia.push(...r);
+  })
+
+  // console.log(vulnerabilidade);
+  // console.log(resistencia);
+  
+  const weak = [];
+  vulnerabilidade.map((v) => {
+    if (!resistencia.includes(v)) {
+      weak.push(v);
+    }
+  });
+  const novaArr = weak.filter((este, i) => weak.indexOf(este) === i);
+  return novaArr
+};
+
+export { getColor, formatNumber, getTypeIconColor, getIconByType, capitalize, getVulnarability }

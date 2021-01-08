@@ -1,7 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity, ProgressBarAndroid } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ProgressBarAndroid,
+} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { getImagePokemon, getInfo, getCategory } from "../../service/api";
+import { getVulnarability } from "../../utils/utils";
 import Constants from "expo-constants";
 import {
   getColor,
@@ -19,52 +27,30 @@ import Animated, { Easing } from "react-native-reanimated";
 
 export default function pokemon() {
   const route = useRoute();
-  const { pokemon, uri } = route.params;
+  const { pokemon, dataPokemon } = route.params;
   const [info, setInfo] = useState("");
   const [category, setCategory] = useState("");
   const [index, setIndex] = useState(0);
+  const [color, setColor] = useState("");
   const [routes] = useState([
     { key: "about", title: "About" },
     { key: "status", title: "Status" },
     { key: "evolution", title: "Evolution" },
   ]);
-  const [cor, setCor] = useState("");
-  const [color2, setColor2] = useState("");
 
-  async function getInfoPokemon() {
-    pokemon.stats.map((st) => {
-      console.log(st.base_stat);
-    });
-    const res = await getInfo(pokemon.id);
-    setInfo(res);
-  }
-
-  async function getCatgeoryPokemon() {
-    const res = await getCategory(pokemon.id);
-    setCategory(res);
-  }
-
-  function getColors() {
-    const a = getColor(pokemon.types[0].type.name);
-    console.log("CORES: ", a);
-    setCor(a);
-  }
   async function getOtherColor() {
     const color = getTypeIconColor(pokemon.types[0].type.name);
-    setColor2(color);
+    setColor(color);
   }
 
   useEffect(() => {
-    getInfoPokemon();
-    getColors();
     getOtherColor();
-    getCatgeoryPokemon();
-  }, []);
+  });
 
   function About() {
     return (
       <View style={[styles.container, { width: "90%", alignSelf: "center" }]}>
-        <Text style={{ color: "#828282" }}>{info}</Text>
+        <Text style={{ color: "#828282", fontSize: 18 }}>{pokemon.info}</Text>
         <View style={{ flexDirection: "row", marginBottom: 12 }}>
           {pokemon.types.map((type) => (
             <View
@@ -110,7 +96,7 @@ export default function pokemon() {
 
         <Text
           style={{
-            color: color2,
+            color: color,
             fontFamily: "Roboto_700Bold",
             fontSize: 22,
             marginBottom: 18,
@@ -118,109 +104,202 @@ export default function pokemon() {
         >
           Pokédex Data
         </Text>
-        <View
-          style={{
-            alignSelf: "center",
-            width: "100%",
-            padding: 4,
-            // height: 80,
-            borderRadius: 10,
-            backgroundColor: "#FCFCFC",
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-
-            elevation: 5,
-          }}
-        >
-          <View>
-            {/* thead */}
+        {dataPokemon.map((data) => (
+          <>
             <View
               style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                marginBottom: 8,
+                alignSelf: "center",
+                width: "100%",
+                padding: 4,
+                // height: 80,
+                borderRadius: 10,
+                backgroundColor: "#FCFCFC",
+                shadowColor: "#000",
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+
+                elevation: 5,
               }}
             >
-              <Text>Height</Text>
-              <Text>Weight</Text>
-              <Text>Gender</Text>
-              <Text>Category</Text>
+              <View>
+                {/* thead */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Text>Height</Text>
+                  <Text>Weight</Text>
+                  <Text>Gender</Text>
+                  <Text>Category</Text>
+                </View>
+
+                {/* tbody */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{ color: color, fontFamily: "Roboto_500Medium" }}
+                  >
+                    {data.poke_data.height}
+                  </Text>
+                  <Text
+                    style={{ color: color, fontFamily: "Roboto_500Medium" }}
+                  >
+                    {data.poke_data.weight}
+                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-around",
+                      width: 34,
+                    }}
+                  >
+                    {data.poke_data.gender.map((g) => (
+                      <>
+                        {g === "unknow" ? (
+                          <Text>{g}</Text>
+                        ) : (
+                          <Ionicons
+                            style={[styles.searchIcon, { color: color }]}
+                            name={`md-${g}`}
+                            size={18}
+                          />
+                        )}
+                      </>
+                    ))}
+                  </View>
+                  <Text
+                    style={{ color: color, fontFamily: "Roboto_500Medium" }}
+                  >
+                    {data.poke_data.category}
+                  </Text>
+                </View>
+                <View style={{ justifyContent: "space-between", margin: 20 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Roboto_400Regular",
+                      fontSize: 16,
+                      marginBottom: 2,
+                    }}
+                  >
+                    Abilities
+                  </Text>
+                  {data.poke_data.abilities.map((item, index) => (
+                    <>
+                      <Text
+                        style={{
+                          color: color,
+                          fontFamily: "Roboto_500Medium",
+                          marginTop: 6,
+                        }}
+                      >{`${index + 1}.  ${item.ability.name} ${
+                        item.is_hidden ? "(hidden ability)" : ""
+                      } `}</Text>
+                    </>
+                  ))}
+                </View>
+                <Text
+                  style={{
+                    fontFamily: "Roboto_400Regular",
+                    fontSize: 16,
+                    marginBottom: 2,
+                  }}
+                >
+                  Weakness
+                </Text>
+                <View style={styles.contentIcon}>
+                  {data.poke_data.weakness.map((w) => (
+                    <View
+                      style={[
+                        styles.iconContent,
+                        { backgroundColor: getTypeIconColor(w) },
+                      ]}
+                    >
+                      <SvgUri
+                        width="20"
+                        height="20"
+                        source={getIconByType(w)}
+                      />
+                    </View>
+                  ))}
+                </View>
+              </View>
             </View>
+            <View style={{marginTop: 20, marginBottom: 20}}>
+              <Text
+                style={{
+                  color: color,
+                  fontFamily: "Roboto_700Bold",
+                  fontSize: 22,
+                  marginBottom: 18,
+                }}
+              >
+                Training
+              </Text>
 
-            {/* tbody */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-around",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
-                {pokemon.height}
-              </Text>
-              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
-                {pokemon.weight}
-              </Text>
               <View
                 style={{
                   flexDirection: "row",
-                  justifyContent: "space-around",
-                  width: 34,
                 }}
               >
-                <Ionicons
-                  style={[styles.searchIcon, { color: color2 }]}
-                  name="md-female"
-                  size={18}
-                />
-                <Ionicons
-                  style={[styles.searchIcon, { color: color2 }]}
-                  name="md-male"
-                  size={18}
-                />
+                <View style={{ width: "50%" }}>
+                  <Text style={{ fontWeight: "medium", fontSize: 16 }}>
+                    Catch rate
+                  </Text>
+                  <Text style={{ fontWeight: "medium", fontSize: 16 }}>
+                    Base Friendship
+                  </Text>
+                  <Text style={{ fontWeight: "medium", fontSize: 16 }}>
+                    Base Exp.
+                  </Text>
+                  <Text style={{ fontWeight: "medium", fontSize: 16 }}>
+                    Growth Rate
+                  </Text>
+                  <Text style={{ fontWeight: "medium", fontSize: 16 }}>
+                    EV yield
+                  </Text>
+                </View>
+                <View style={{ width: "50%" }}>
+                  <Text style={{ color, fontSize: 16 }}>
+                    {data.training.catch_rate}
+                  </Text>
+                  <Text style={{ color, fontSize: 16 }}>
+                    {data.training.base_friendship}
+                  </Text>
+                  <Text style={{ color, fontSize: 16 }}>
+                    {data.training.base_exp}
+                  </Text>
+                  <Text style={{ color, fontSize: 16 }}>
+                    {data.training.growth_rate}
+                  </Text>
+                  {data.training.ev_yield.map((t) => (
+                    <Text style={{ color, fontSize: 16 }}>
+                      {t.effort} {t.stat.name}
+                    </Text>
+                  ))}
+                </View>
               </View>
-              <Text style={{ color: color2, fontFamily: "Roboto_500Medium" }}>
-                {category}
-              </Text>
             </View>
-          </View>
-          <View style={{ justifyContent: "space-between", margin: 20 }}>
-            <Text
-              style={{
-                fontFamily: "Roboto_400Regular",
-                fontSize: 16,
-                marginBottom: 2,
-              }}
-            >
-              Abilities
-            </Text>
-            {pokemon.abilities.map((item, index) => (
-              <>
-                <Text
-                  style={{
-                    color: color2,
-                    fontFamily: "Roboto_500Medium",
-                    marginTop: 6,
-                  }}
-                >{`${index + 1}.  ${item.ability.name} ${
-                  item.is_hidden ? "(hidden ability)" : ""
-                } `}</Text>
-              </>
-            ))}
-          </View>
-        </View>
+          </>
+        ))}
       </View>
     );
   }
   function Status() {
     return (
       <View style={[styles.container]}>
-        <Text>Base Stats</Text>
+        {/* <Text>Base Stats</Text>
         {pokemon.stats.map((st) => (
           <View>
             <View style={{flexDirection: "row"}}>
@@ -229,7 +308,7 @@ export default function pokemon() {
               <ProgressBarAndroid styleAttr="Horizontal" color={color2} indeterminate={false} progress={st.base_stat/100} />
             </View>
           </View>
-        ))}
+        ))} */}
       </View>
     );
   }
@@ -264,14 +343,16 @@ export default function pokemon() {
                 setIndex(i);
               }}
             >
-              <Animated.Text style={{ color: index === i ? cor : "#828282" }}>
+              <Animated.Text
+                style={{ color: index === i ? pokemon.color : "#828282" }}
+              >
                 {route.title}
               </Animated.Text>
               <Animated.View
                 style={{
                   height: 2,
                   width: index === i ? 80 : 10,
-                  backgroundColor: cor,
+                  backgroundColor: pokemon.color,
                 }}
               />
             </TouchableOpacity>
@@ -290,7 +371,7 @@ export default function pokemon() {
         ]}
       >
         <View style={styles.contentHeader}>
-          <Image source={{ uri: uri }} style={styles.imagePokemon} />
+          <Image source={{ uri: pokemon.url }} style={styles.imagePokemon} />
           <View style={styles.someInfo}>
             <Text style={styles.numberPokedex}>{formatNumber(pokemon.id)}</Text>
             <Text style={styles.titlePokemon}>{capitalize(pokemon.name)}</Text>
@@ -303,8 +384,8 @@ export default function pokemon() {
                   ]}
                 >
                   <SvgUri
-                    width="18"
-                    height="18"
+                    width="20"
+                    height="20"
                     source={getIconByType(type.type.name)}
                   />
                 </View>
@@ -388,8 +469,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     margin: 6,
-    width: 26,
-    height: 26,
+    width: 30,
+    height: 30,
     borderRadius: 50,
     shadowColor: "#000",
     shadowOffset: {

@@ -2,7 +2,7 @@ import axios from "axios";
 import { getColor } from "../utils/utils";
 
 const pokeApi = axios.create({
-  baseURL: "https://pokeapi.co/api/v2",
+  baseURL: "http://192.168.0.30:3333",
 });
 
 const getImage = axios.create({
@@ -20,9 +20,13 @@ const getAllPokemon = async (page) => {
   return data;
 };
 
-const getSpecificPokemon = async (name) => {
-  const response = await pokeApi.get(`/pokemon/${name}`);
-  return response.data;
+const getSpecificPokemon = async (id) => {
+  try {
+    const { data } = await pokeApi.get(`/pokemon/${id}`)
+    return data
+  } catch (error) {
+    console.log("[ERROR] Erro while get info from api", error)
+  }
 };
 
 const getInfo = async (nameorId) => {
@@ -58,43 +62,34 @@ const getColorByType = async (name) => {
   return result;
 };
 
-const getPokemon = async (nextPage) => {
-  const { results, next } = await getAllPokemon(nextPage);
-  let pokemons = results;
-  const res = [];
+async function getPokemons(){
+  try {
+    const { data: { data: res } } = await pokeApi.get("/")
+    return res
+  } catch (error) {
+    console.log("[ERROR] Erro while get info from api", error)
+  }
+};
 
-  pokemons
-    .sort((a, b) => a.url - b.url)
-    .map(async (pokemon) => {
-      let poke = {};
-
-      const po = await getSpecificPokemon(pokemon.name);
-      const img = await getImagePokemon(po.id);
-      const type = getColor(po.types[0].type.name);
-
-      poke.id = po.id;
-      poke.name = po.name;
-      poke.url = img;
-      poke.color = type;
-      poke.types = po.types;
-      poke.all = po;
-
-      await Promise.all(
-        res.push(poke),
-        res.sort((a, b) => a.id - b.id)
-      );
-    });
-  return [res, next];
+const getSinglePokemon = async (nameOrId) => {
+  try {
+    const { data: { data: res } } = await pokeApi.get(`/${nameOrId}`)
+    return res
+  } catch (error) {
+    console.log("[ERROR] Erro while get info from api", error)
+  }
 };
 
 getCategory(1);
+// getPokemons();
 
 export {
   getAllPokemon,
   getSpecificPokemon,
   getImagePokemon,
   getColorByType,
-  getPokemon,
+  getPokemons,
   getInfo,
   getCategory,
+  getSinglePokemon,
 };
